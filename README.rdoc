@@ -1,16 +1,16 @@
-h1. SmartView
+= SmartView
 
 SmartView is a Ruby library for implementing clients that can communicate with Hyperion's SmartView providers.
 
-h2. Hyperion SmartView
+== Hyperion SmartView
 
 Hyperion(r) SmartView for Office is a Microsoft Office Add-In that allows Office products to interact with Oracle's Hyperion Essbase, Hyperion Financial Management, Hyperion Planning and Hyperion Workspace products.
 
 The SmartView Add-In communicates with SmartView Providers via XML over HTTP. This protocol is not published, but is fairly straightforward to reverse engineer. Providers appear to use a common protocol, albeit with some small differences depending on the data source.
 
-h2. SmartView Gem
+== SmartView Gem
 The SmartView gem provides a Ruby implementation of the SmnartView protocol, allowing Ruby programs to act as clients to SmartView providers. The SmartView gem hides the details of the protocol, and provides a relatively simple interface for Ruby programs that wish to retrieve data and metadata from Hperion Essbase and Financial Management.
 
-h2. License
+== License
 
 This code is provided under a BSD-style licence - See COPYING for licence terms.
