@@ -29,7 +29,7 @@ class SmartView
     class NotConnected < RuntimeError; end
 
 
-    attr_reader :session_id
+    attr_reader :session_id, :provider
     attr_accessor :user, :password, :sso
     attr_reader :preferences
 
@@ -49,7 +49,7 @@ class SmartView
     # 2. SSO token
     # The SSO method will be used if the sso instance variable is set;
     # otherwise, the userid and password will be used.
-    def connect(server, app, cube)
+    def connect
         # Obtain a session id
         if @sso
             # Connect via SSO token
@@ -67,7 +67,17 @@ class SmartView
                 xml.lngs({:enc => 0}, "en_US")
             end
         end
-        @session_id = invoke.search('//res_ConnectToProvider/sID').inner_html
+        doc = invoke
+        @session_id = doc.at('//res_ConnectToProvider/sID').inner_html
+        @provider = doc.at('//res_ConnectToProvider/provider').inner_html
+    end
+
+
+    # Open an application via the current provider
+    def open_app(server, app, cube)
+        raise NotConnectedError, "No provider connection established" unless @session_id && @provider
+
+        # Reset app state
         @dimensions = nil
         @alias_table = 'none'
 
@@ -90,7 +100,7 @@ class SmartView
             @req.GetSSOToken do |xml|
                 xml.sID @session_id
             end
-            @sso = invoke.search('//res_ConnectToProvider/sso').inner_html
+            @sso = invoke.at('//res_GetSSOToken/sso').inner_html
         end
 
         # Open cube
@@ -101,6 +111,9 @@ class SmartView
             xml.cube cube
         end
         invoke
+
+        @app = app
+        @cube = cube
     end
 
 
@@ -110,6 +123,8 @@ class SmartView
             xml.sID @session_id
         end
         invoke
+        @session_id = nil
+        @provider = nil
     end
 
     # Get the default POV
@@ -166,7 +181,7 @@ class SmartView
             end
         end
         doc = invoke
-        Grid.new(doc)
+        Grid.from_xml(doc)
     end
 
 
@@ -213,80 +228,15 @@ class SmartView
             self.pov = grid_pov
         end
 
-        # Extract dimension names and members for rows and cols
-        row_dims = rows.keys[0]
-        row_dims = [row_dims] if row_dims.is_a? String
-        row_tuples = rows.values[0]
-        if row_tuples.is_a? String
-            row_tuples = [[row_tuples]]
-        elsif row_tuples[0].is_a? String
-            row_tuples = row_tuples.map{|mbr| [mbr]}
-        end
-
-        col_dims = cols.keys[0]
-        col_dims = [col_dims] if col_dims.is_a? String
-        col_tuples = cols.values[0]
-        if col_tuples.is_a? String
-            col_tuples = [[col_tuples]]
-        elsif col_tuples[0].is_a? String
-            col_tuples = [col_tuples]
-        end
+        grid = Grid.define(rows, cols)
 
         @req.Refresh do |xml|
             xml.sID @session_id
             @preferences.inject_xml xml
-            xml.grid do |xml|
-                xml.cube
-                xml.dims do |xml|
-                    @dimensions.each_with_index do |dim,i|
-                        if row_dims.include? dim
-                          xml.dim :id => i, :name => dim, :row => row_dims.index(dim), :hidden => 0, :expand => 1
-                        elsif col_dims.include? dim
-                          xml.dim :id => i, :name => dim, :col => col_dims.index(dim), :hidden => 0, :expand => 1
-                        else
-                          xml.dim :id => i, :name => dim, :pov => pov[dim], :display => pov[dim], :hidden => 0, :expand => 1
-                        end
-                    end
-                end
-                xml.slices do |xml|
-                    xml.slice :rows => col_dims.size + row_tuples.size, :cols => row_dims.size + col_tuples.size do |xml|
-                        xml.data do |xml|
-                            xml.range :start => 0, :end => (row_tuples.size + col_dims.size) * (row_dims.size + col_tuples.size) - 1 do
-                                vals, types = [], []
-
-                                # Output column header rows
-                                0.upto(col_dims.size-1) do |row_num|
-                                    0.upto(row_dims.size-1) do |col_num|
-                                        vals << ''
-                                        types << GRID_TYPE_UPPER_LEFT
-                                    end
-                                    col_tuples.each do |col_tuple|
-                                        vals << col_tuple[row_num]
-                                        types << GRID_TYPE_MEMBER
-                                    end
-                                end
-
-                                # Output row header rows
-                                row_tuples.each do |row_tuple|
-                                    row_tuple.each do |mbr|
-                                        vals << mbr
-                                        types << GRID_TYPE_MEMBER
-                                    end
-                                    0.upto(col_tuples.size-1) do
-                                        vals << ''
-                                        types << GRID_TYPE_DATA
-                                    end
-                                end
-                                xml.vals vals.join('|')
-                                xml.types types.join('|')
-                            end
-                        end
-                    end
-                end
-            end
+            grid.to_xml(xml, @dimensions, pov)
         end
         doc = invoke
-        Grid.new(doc)
+        Grid.from_xml(doc)
     end
 
 
@@ -308,14 +258,14 @@ class SmartView
             end
         end
         doc = invoke
-        Grid.new(doc)
+        Grid.from_xml(doc)
     end
 
 
 private
 
     def check_connected
-        raise NotConnected unless @session_id and @sso
+        raise NotConnected unless @session_id && @sso && @provider
     end
 
     # Retrieve a list of dimensions for the current connection
