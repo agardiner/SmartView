@@ -1,9 +1,10 @@
-require 'rubygems'
 require 'httpclient'
 require 'builder'
 require 'hpricot'
 
-require 'pp'
+require 'smartview/request'
+require 'smartview/preferences'
+require 'smartview/grid'
 
 
 class SmartView
@@ -28,115 +29,6 @@ class SmartView
     class NotConnected < RuntimeError; end
 
 
-    class Request
-        attr_reader :method
-
-        def initialize
-            @xml = Builder::XmlMarkup.new(:indent => 2, :target => self)
-        end
-
-        def <<(val)
-            @buffer << val
-        end
-
-        def new_request
-            @buffer = ""
-            @xml.instruct!
-        end
-
-        def to_s
-            @buffer
-        end
-
-        def method_missing(method, *args, &block)
-            new_request
-            @method = method
-            @xml.__send__(('req_' + method.to_s).intern, *args, &block)
-        end
-    end
-
-
-
-    class Preferences
-        attr_accessor :suppress_zero, :suppress_invalid, :suppress_missing, :suppress_underscore, :suppress_noaccess
-        attr_reader   :ancestor_position, :zoom_mode
-        attr_accessor :navigate_with_data
-        attr_accessor :include_selection, :within_selected_group, :remove_unselected_groups
-        attr_accessor :no_access_text, :missing_text
-        attr_accessor :suppress_repeated_members
-        attr_reader   :indent
-
-        def initialize
-            @ancestor_position = 'bottom'
-            @zoom_mode = 'children'
-            @navigate_with_data = true
-            @include_selection = true
-            @missing_text = '#Missing'
-            @no_access_text = '#No Access'
-            @suppress_repeated_members = false
-            @indent = 'none'
-        end
-
-        def ancestor_position=(pos)
-            raise InvalidPreference unless pos =~ /^(top|bottom)$/i
-            @ancestor_position = pos
-        end
-
-        def zoom_mode=(mode)
-            raise InvalidPreference unless mode =~ /^(descendents|children|base)$/i
-            @zoom_mode = mode
-        end
-
-        def indent=(ind)
-            raise InvalidPreference unless indent =~ /^(none|subitems|totals)$/i
-            @indent = indent
-        end
-
-        def inject_xml(xml)
-            xml.preferences do
-                xml.row_suppression :zero => @suppress_zero ? 1 : 0, :invalid => @suppress_invalid ? 1 : 0,
-                    :underscore => @suppress_underscore ? 1 : 0, :noaccess => @suppress_noaccess ? 1 : 0
-                xml.celltext :val => 0
-                xml.zoomin :ancestor => @ancestor_position, :mode => @zoom_mode
-                xml.navigate :withData => @navigate_with_data ? 1 : 0
-                xml.includeSelection :val => @include_selection ? 1 : 1
-                xml.repeatMemberLabels :val => @suppress_repeated_members ? 0 : 1
-                xml.withinSelectedGroup :val => @within_selected_group ? 1 : 0
-                xml.removeUnselectedGroup :val => @remove_unselected_groups ? 1 : 0
-                xml.includeDescriptionInLabel :val => @name_and_description ? 1 : 0
-                xml.missingLabelText :val => @missing_text
-                xml.noAccessText :val => @no_access_text
-                xml.essIndent :val => case @indent
-                    when /subitems/i then 1
-                    when /totals/i then 2
-                    else 0
-                end
-            end
-        end
-    end
-
-
-    class Grid
-        def initialize(doc)
-            slice = doc.at('*/slice')
-            @row_count = slice['rows'].to_i
-            @col_count = slice['cols'].to_i
-            @vals = slice.at('/data/range/vals').to_plain_text.split('|')
-            @types = slice.at('data/range/types').to_plain_text.split('|')
-        end
-
-        def output
-            0.upto(@row_count-1) do |row|
-                fields = []
-                0.upto(@col_count-1) do |col|
-                    fields << @vals[row * @col_count + col]
-                end
-                yield fields
-            end
-        end
-    end
-
-
     attr_reader :session_id
     attr_accessor :user, :password, :sso
     attr_reader :preferences
@@ -155,6 +47,8 @@ class SmartView
     # Two methods of connection are supported:
     # 1. Userid and password
     # 2. SSO token
+    # The SSO method will be used if the sso instance variable is set;
+    # otherwise, the userid and password will be used.
     def connect(server, app, cube)
         # Obtain a session id
         if @sso
@@ -414,7 +308,7 @@ class SmartView
             end
         end
         doc = invoke
-        pp doc
+        Grid.new(doc)
     end
 
 
@@ -450,7 +344,6 @@ private
             else
                 raise RuntimeError, "Unexpected response from SmartView provider: #{doc.to_plain_text}"
             end
-            pp doc
         end
         doc
     end
