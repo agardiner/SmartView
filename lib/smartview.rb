@@ -12,10 +12,6 @@ class SmartView
 
     CLIENT_XML_VERSION = "3.1.0.0.0"
 
-    GRID_TYPE_UPPER_LEFT = '7'
-    GRID_TYPE_MEMBER = '0'
-    GRID_TYPE_DATA = '2'
-
     class SmartViewException < RuntimeError
         def initialize(xml)
             super(xml.at('desc').inner_html)
@@ -306,8 +302,11 @@ private
         if !doc.at("//res_#{@req.method}")
             @logger.error "Error invoking SmartView method #{@req.method}"
             if ex = doc.at('//exception')
-                raise SmartViewException.new(ex)
+                ex = SmartViewException.new(ex)
+                @logger.error "An exception occurred in #{@req.method}", ex
+                raise ex
             else
+                @logger.error "Unexpected response from SmartView provider:\n#{@logger.error doc.to_plain_text}"
                 raise RuntimeError, "Unexpected response from SmartView provider: #{doc.to_plain_text}"
             end
         end
