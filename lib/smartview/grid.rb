@@ -8,6 +8,7 @@ class SmartView
         GRID_TYPE_UPPER_LEFT = '7'
         GRID_TYPE_MEMBER = '0'
         GRID_TYPE_DATA = '2'
+        GRID_TYPE_TEXT = '3'
 
 
         # Creates a grid definition from row and column tuple definitions.
@@ -27,7 +28,7 @@ class SmartView
         #     * a single member or array of members (single dimension on axis)
         #     * an array of arrays, where each inner array represents a tuple
         #       of members (one member for each dimension on that axis).
-        def self.define(rows, cols=nil)
+        def self.define(dimensions, pov, rows, cols=nil)
             if !rows.is_a? Hash
                 raise InvalidGridSpecification, "Row and column specifications must be in the form of a hash"
             end
@@ -74,30 +75,60 @@ class SmartView
                 end
             end
 
-            Grid.new(row_count, col_count, vals, types, row_dims, col_dims)
+            Grid.new(dimensions, pov, row_dims, col_dims, row_count, col_count, vals, types)
         end
 
 
         # Creates a Grid object from an XML document returned from a SmartView provider
         def self.from_xml(doc)
+            dimensions = [], pov = {}, row_dims = [], col_dims = []
+            doc.search('*/grid/dims/dim').each do |dim|
+                dimensions[dim['id'].to_i] = dim['name']
+                if dim['pov']
+                    pov[dim['name']] = dim['pov']
+                elsif dim['row']
+                    row_dims[dim['row'].to_i] = dim['name']
+                elsif dim['col']
+                    col_dims[dim['col'].to_i] = dim['name']
+                end
+            end
+
             slice = doc.at('*/slice')
             row_count = slice['rows'].to_i
             col_count = slice['cols'].to_i
-            vals = slice.at('/data/range/vals').to_plain_text.split('|')
-            types = slice.at('data/range/types').to_plain_text.split('|')
+            vals = slice.at('/data/range/vals').to_plain_text.split('|', -1)
+            types = slice.at('data/range/types').to_plain_text.split('|', -1)
 
-            Grid.new(row_count, col_count, vals, types)
+            Grid.new(dimensions, pov, row_dims, col_dims, row_count, col_count, vals, types)
         end
 
+        attr_reader :row_count, :col_count
 
         # Creates a new Grid object
-        def initialize(row_count, col_count, vals, types, row_dims=nil, col_dims=nil)
+        def initialize(dimensions, pov, row_dims, col_dims, row_count, col_count, vals, types)
+            @dimensions = dimensions
+            @pov = pov
+            @row_dims = row_dims
+            @col_dims = col_dims
             @row_count = row_count
             @col_count = col_count
             @vals = vals
             @types = types
-            @row_dims = row_dims
-            @col_dims = col_dims
+        end
+
+
+        # Retrieve a cell value at the specified row and column intersection.
+        def [](row, col)
+            val = @vals[row * @col_count + col]
+            val.length > 0 && cell_type(row, col) == GRID_TYPE_DATA ? val.to_f : val
+        end
+
+
+        # Returns a Fixnum identifying the type of the value at the specified
+        # row and column intersection. The return value will be one of the
+        # GRID_TYPE_* constants.
+        def cell_type(row, col)
+            @types[row * @col_count + col]
         end
 
 
@@ -107,7 +138,7 @@ class SmartView
             0.upto(@row_count-1) do |row|
                 fields = []
                 0.upto(@col_count-1) do |col|
-                    fields << @vals[row * @col_count + col]
+                    fields << self[row, col]
                 end
                 yield fields
             end
@@ -116,17 +147,19 @@ class SmartView
 
         # Converts a Grid object to an XML representation as required by a
         # SmartView provider
-        def to_xml(builder, dimensions, pov)
+        def to_xml(builder)
             builder.grid do |xml|
                 xml.cube
                 xml.dims do |xml|
-                    dimensions.each_with_index do |dim,i|
-                        if @row_dims.include? dim
-                          xml.dim :id => i, :name => dim, :row => @row_dims.index(dim), :hidden => 0, :expand => 1
-                        elsif @col_dims.include? dim
-                          xml.dim :id => i, :name => dim, :col => @col_dims.index(dim), :hidden => 0, :expand => 1
-                        else
-                          xml.dim :id => i, :name => dim, :pov => pov[dim], :display => pov[dim], :hidden => 0, :expand => 1
+                    if @dimensions && @pov
+                        @dimensions.each_with_index do |dim,i|
+                            if @row_dims.include? dim
+                              xml.dim :id => i, :name => dim, :row => @row_dims.index(dim), :hidden => 0, :expand => 1
+                            elsif @col_dims.include? dim
+                              xml.dim :id => i, :name => dim, :col => @col_dims.index(dim), :hidden => 0, :expand => 1
+                            else
+                              xml.dim :id => i, :name => dim, :pov => @pov[dim], :display => @pov[dim], :hidden => 0, :expand => 1
+                            end
                         end
                     end
                 end

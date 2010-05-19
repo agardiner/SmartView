@@ -34,6 +34,30 @@ class SmartView
     attr_reader :preferences
 
 
+    # Utility method for building up a tuple by cross-joining sets for each dimension
+    def self.cross_join(*args)
+        result = nil
+        args.each do |arg|
+            return nil if arg.nil?
+            arg = [arg] unless arg.is_a? Array
+            if result
+                new_result = []
+                result.each do |tuple|
+                    arg.each do |next_val|
+                        new_result << (tuple.is_a?(Array) ? tuple : [tuple]) + [next_val]
+                    end
+                end
+                result = new_result
+            else
+                # First dimension added to result
+                result = arg
+            end
+        end
+        result
+    end
+
+
+    # Create a SmartView connection for the specified provider URL.
     def initialize(provider_url)
         @url = provider_url
         @req = Request.new
@@ -185,29 +209,6 @@ class SmartView
     end
 
 
-    # Utility method for building up a tuple by cross-joining sets for each dimension
-    def self.cross_join(*args)
-        result = nil
-        args.each do |arg|
-            return nil if arg.nil?
-            arg = [arg] unless arg.is_a? Array
-            if result
-                new_result = []
-                result.each do |tuple|
-                    arg.each do |next_val|
-                        new_result << (tuple.is_a?(Array) ? tuple : [tuple]) + [next_val]
-                    end
-                end
-                result = new_result
-            else
-                # First dimension added to result
-                result = arg
-            end
-        end
-        result
-    end
-
-
     # Return a grid for the spcified rows and columns and optional POV
     # The rows must be a hash whose key is a single dimension name, or array of
     # dimension names. The value of the hash must be an array containing tuples
@@ -228,12 +229,12 @@ class SmartView
             self.pov = grid_pov
         end
 
-        grid = Grid.define(rows, cols)
+        grid = Grid.define(@dimensions, pov, rows, cols)
 
         @req.Refresh do |xml|
             xml.sID @session_id
             @preferences.inject_xml xml
-            grid.to_xml(xml, @dimensions, pov)
+            grid.to_xml(xml)
         end
         doc = invoke
         Grid.from_xml(doc)
