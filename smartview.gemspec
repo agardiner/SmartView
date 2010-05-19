@@ -11,6 +11,6 @@ GEMSPEC = Gem::Specification.new do |spec|
     spec.version = '0.0.1'
     spec.add_dependency 'builder'
     spec.add_dependency 'hpricot'
-    spec.add_dependency 'http-client'
+    spec.add_dependency 'httpclient'
 end
 
