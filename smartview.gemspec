@@ -7,7 +7,7 @@ GEMSPEC = Gem::Specification.new do |spec|
     spec.author = 'Adam Gardiner'
     spec.email = 'adam.b.gardiner@gmail.com'
     spec.require_paths = ['lib']
-    spec.files = Dir['lib/*.rb'] + ['README', 'COPYING']
+    spec.files = ['README.rdoc', 'COPYING'] + Dir['lib/**/*.rb']
     spec.version = '0.0.1'
     spec.add_dependency 'builder'
     spec.add_dependency 'hpricot'
