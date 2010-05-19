@@ -4,6 +4,8 @@ class SmartView
 
     class Grid
 
+        include Enumerable
+
         # Cell-type constants
         GRID_TYPE_UPPER_LEFT = '7'
         GRID_TYPE_MEMBER = '0'
@@ -134,7 +136,7 @@ class SmartView
 
         # Iterates over each row of the grid, returning an array of values (one
         # per column)
-        def each_row
+        def each
             0.upto(@row_count-1) do |row|
                 fields = []
                 0.upto(@col_count-1) do |col|
@@ -147,22 +149,10 @@ class SmartView
 
         # Converts a Grid object to an XML representation as required by a
         # SmartView provider
-        def to_xml(builder)
+        def to_xml(builder, include_dims=true)
             builder.grid do |xml|
                 xml.cube
-                xml.dims do |xml|
-                    if @dimensions && @pov
-                        @dimensions.each_with_index do |dim,i|
-                            if @row_dims.include? dim
-                              xml.dim :id => i, :name => dim, :row => @row_dims.index(dim), :hidden => 0, :expand => 1
-                            elsif @col_dims.include? dim
-                              xml.dim :id => i, :name => dim, :col => @col_dims.index(dim), :hidden => 0, :expand => 1
-                            else
-                              xml.dim :id => i, :name => dim, :pov => @pov[dim], :display => @pov[dim], :hidden => 0, :expand => 1
-                            end
-                        end
-                    end
-                end
+                dims_to_xml(xml) if include_dims
                 xml.slices do |xml|
                     xml.slice :rows => @row_count, :cols => @col_count do |xml|
                         xml.data do |xml|
@@ -174,6 +164,31 @@ class SmartView
                     end
                 end
             end
+        end
+
+
+        def dims_to_xml(xml)
+            xml.dims do |xml|
+                if @dimensions && @pov
+                    @dimensions.each_with_index do |dim,i|
+                        if @row_dims.include? dim
+                          xml.dim :id => i, :name => dim, :row => @row_dims.index(dim), :hidden => 0, :expand => 1
+                        elsif @col_dims.include? dim
+                          xml.dim :id => i, :name => dim, :col => @col_dims.index(dim), :hidden => 0, :expand => 1
+                        else
+                          xml.dim :id => i, :name => dim, :pov => @pov[dim], :display => @pov[dim], :hidden => 0, :expand => 1
+                        end
+                    end
+                end
+            end
+        end
+
+
+        # Converts the grid to a text representation.
+        def to_s(sep="\t")
+            map do |row|
+                row.join(sep)
+            end.join("\n")
         end
 
     private

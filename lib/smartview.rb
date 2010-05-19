@@ -151,6 +151,7 @@ class SmartView
         @provider = nil
     end
 
+
     # Get the default POV
     def default_pov
         # Make sure we are connected
@@ -182,10 +183,7 @@ class SmartView
 
     # Returns a hash indicating the current POV
     def pov
-        # Return default POV if no POV has been set yet
-        unless @pov
-            default_pov
-        end
+        default_pov unless @pov
         @pov
     end
 
@@ -209,27 +207,10 @@ class SmartView
     end
 
 
-    # Return a grid for the spcified rows and columns and optional POV
-    # The rows must be a hash whose key is a single dimension name, or array of
-    # dimension names. The value of the hash must be an array containing tuples
-    # of member names for the dimension(s) in the rows.
-    # The cols must be a hash whose key is a single dimension name, or array of
-    # dimension names. The value of the hash must be an array containing tuples
-    # of member names for the dimension(s) in the cols.
-    # The pov is an optional POV that will be merged with the current POV to
-    # determine the retrieved POV.
-    def refresh(rows, cols, grid_pov=nil)
+    # Refresh a grid from the current provider
+    def refresh(grid)
         # Make sure we are connected
         check_connected
-
-        get_dimensions unless @dimensions
-
-        # Update the POV if one is specified
-        if grid_pov
-            self.pov = grid_pov
-        end
-
-        grid = Grid.define(@dimensions, pov, rows, cols)
 
         @req.Refresh do |xml|
             xml.sID @session_id
@@ -241,22 +222,42 @@ class SmartView
     end
 
 
-    def get_data
+    # Return a grid for the spcified rows and columns and optional POV
+    # The rows must be a hash whose key is a single dimension name, or array of
+    # dimension names. The value of the hash must be an array containing tuples
+    # of member names for the dimension(s) in the rows.
+    # The cols must be a hash whose key is a single dimension name, or array of
+    # dimension names. The value of the hash must be an array containing tuples
+    # of member names for the dimension(s) in the cols.
+    # The pov is an optional POV that will be merged with the current POV to
+    # determine the retrieved POV.
+    def free_form_grid(rows, cols, grid_pov=nil)
         # Make sure we are connected
         check_connected
+        get_dimensions unless @dimensions
+
+        # Update the POV if one is specified
+        if grid_pov
+            self.pov = grid_pov
+        end
+
+        grid = Grid.define(@dimensions, pov, rows, cols)
 
         @req.ProcessFreeFormGrid do |xml|
             xml.sID @session_id
             @preferences.inject_xml xml
             xml.backgroundpov do |xml|
-                pov.each_with_index do |dim,mbr,i|
-                    xml.dim
+                pov.each do |dim,mbr|
+                    xml.dim :name => dim, :pov => mbr
                 end
             end
-            xml.grid do |xml|
+            xml.backgroundpov do |xml|
+                pov.each do |dim,mbr|
+                    xml.dim :name => dim, :pov => mbr
+                end
             end
-            xml.dims do |xml|
-            end
+            grid.to_xml(xml, false)
+            grid.dims_to_xml(xml)
         end
         doc = invoke
         Grid.from_xml(doc)
@@ -265,9 +266,12 @@ class SmartView
 
 private
 
+    # Checks to see that a session has been established, raising a NotConnected
+    # exception if one has not.
     def check_connected
         raise NotConnected unless @session_id && @sso && @provider
     end
+
 
     # Retrieve a list of dimensions for the current connection
     def get_dimensions
@@ -276,9 +280,11 @@ private
             xml.alsTbl @alias_table
         end
         @dimensions = []
-        invoke.search('//res_EnumDims/dimList/dim').each |dim|
-            @dimensions << dim['name']
+        invoke.search('//res_EnumDims/dimList/dim').each do |dim|
+            @dimensions[dim['id'].to_i] = dim['name']
+        end
     end
+
 
     # Sends the current request XML to the SmartView provider, and parses the
     # response with hpricot.
