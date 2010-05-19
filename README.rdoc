@@ -11,6 +11,41 @@ The SmartView Add-In communicates with SmartView Providers via XML over HTTP. Th
 == SmartView Gem
 The SmartView gem provides a Ruby implementation of the SmnartView protocol, allowing Ruby programs to act as clients to SmartView providers. The SmartView gem hides the details of the protocol, and provides a relatively simple interface for Ruby programs that wish to retrieve data and metadata from Hperion Essbase and Financial Management.
 
+== Installation
+
+1. Download the source from github, then run the following command to create the SmartView gem:
+     rake gem:gem
+2. Install the gem into your Ruby using the following gem command:
+     gem install <path-to-gem>
+3. The SmartView gem has a small number of dependencies: builder, hpricot, and httpclient. If you are using JRuby and wish to use SSL, you will also need to install the jruby-openssl gem.
+
+== Getting Started
+
+Now that you have the SmartView gem installed, you are ready to interact with a SmartView provider, and retrieve data.
+
+    require 'smartview'
+
+    sm = SmartView.new 'http://<some-server>/HFMProvider/HFMProvider.aspx'
+    sm.user = '<user>'
+    sm.password = '<pwd>'
+    # or sm.sso = <sso-token>
+    sm.connect
+
+    sm.open_app '<server>', '<app>', '<cube>'
+    grid = sm.free_form_retrieve(
+         {'Accounts' => ['IS', 'BS']},      # Row dimension is Accounts, members are IS and BS
+         {['Year', 'Periods'] => [['2009', 'Dec'], ['2010', 'Jan']},    # Two column dimensions
+         {'Scenario' => 'Actual', 'Value' => 'USD Total'}   # Non-default POVs
+    )
+
+    puts grid
+
+    # Outputs:
+    #       2009    2010
+    #       Dec     Jan
+    #  IS   1234.56 2345.67
+    #  BS   7890.12 8910.12
+
 == License
 
 This code is provided under a BSD-style licence - See COPYING for licence terms.
