@@ -1,3 +1,4 @@
+require 'benchmark'
 require 'httpclient'
 require 'builder'
 require 'hpricot'
@@ -58,12 +59,17 @@ class SmartView
 
 
     # Create a SmartView connection for the specified provider URL.
-    def initialize(provider_url)
+    def initialize(provider_url, logger=nil)
         @url = provider_url
         @req = Request.new
         @preferences = Preferences.new
         @http = HTTPClient.new
         @http.proxy = nil
+        unless logger
+            require 'logger'
+            logger = Logger.new(STDOUT)
+        end
+        @logger = logger
     end
 
 
@@ -291,11 +297,14 @@ private
     # If an exception was returned, an HFMException is raised with the details
     # of the error.
     def invoke
-        puts "Invoking #{@req.method}"
-        resp = @http.post @url, @req.to_s
+        resp = nil
+        ms = Benchmark.realtime do
+            resp = @http.post @url, @req.to_s
+        end
+        @logger.info 'SmartView request %s completed in %.1fms' % [@req.method, ms]
         doc = Hpricot::XML(resp.body.content)
         if !doc.at("//res_#{@req.method}")
-            puts "Error invoking SmartView method #{@req.method}:"
+            @logger.error "Error invoking SmartView method #{@req.method}"
             if ex = doc.at('//exception')
                 raise SmartViewException.new(ex)
             else
@@ -304,4 +313,5 @@ private
         end
         doc
     end
+
 end
