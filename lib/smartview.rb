@@ -32,33 +32,6 @@ class SmartView
     attr_reader :preferences
 
 
-    # Utility method for building up a tuple by cross-joining sets for each
-    # dimension. A cross-join creates a tuple that is a combination of every
-    # member of one set with every member of another. This method handles any
-    # number of sets, each of which may be a single member (String), or an
-    # array of members. However, if any argument is nil, the result is nil.
-    def self.cross_join(*args)
-        result = nil
-        args.each do |arg|
-            return nil if arg.nil?
-            arg = [arg] unless arg.is_a? Array
-            if result
-                new_result = []
-                result.each do |tuple|
-                    arg.each do |next_val|
-                        new_result << (tuple.is_a?(Array) ? tuple : [tuple]) + [next_val]
-                    end
-                end
-                result = new_result
-            else
-                # First dimension added to result
-                result = arg
-            end
-        end
-        result
-    end
-
-
     # Create a SmartView connection for the specified provider URL.
     def initialize(provider_url, logger=nil)
         @url = provider_url

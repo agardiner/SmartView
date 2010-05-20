@@ -13,6 +13,35 @@ class SmartView
         GRID_TYPE_TEXT = '3'
 
 
+        # Utility method for building up a set of tuples by cross-joining sets of
+        # members for each dimension. A cross-join creates a tuple that is a
+        # combination of every member of one set with every member of another.
+        # This method handles any number of sets, each of which may be a single
+        # member (String), or an array of members. However, if any argument is nil,
+        # the result is nil.
+        def self.cross_join(*args)
+            result = nil
+            return result unless args
+            args.each do |arg|
+                return nil if arg.nil?
+                arg = [arg] unless arg.is_a? Array
+                if result
+                    new_result = []
+                    result.each do |tuple|
+                        arg.each do |next_val|
+                            new_result << (tuple.is_a?(Array) ? tuple : [tuple]) + [next_val]
+                        end
+                    end
+                    result = new_result
+                else
+                    # First dimension added to result
+                    result = arg.map{|el| [el]}
+                end
+            end
+            result
+        end
+
+
         # Creates a grid definition from row and column tuple definitions.
         # The row and column tuple definitions are in the form of a hash. Either
         # a single hash with two entries (one for rows and one for columns), or
