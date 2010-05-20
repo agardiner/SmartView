@@ -31,7 +31,11 @@ class SmartView
     attr_reader :preferences
 
 
-    # Utility method for building up a tuple by cross-joining sets for each dimension
+    # Utility method for building up a tuple by cross-joining sets for each
+    # dimension. A cross-join creates a tuple that is a combination of every
+    # member of one set with every member of another. This method handles any
+    # number of sets, each of which may be a single member (String), or an
+    # array of members. However, if any argument is nil, the result is nil.
     def self.cross_join(*args)
         result = nil
         args.each do |arg|
@@ -79,6 +83,7 @@ class SmartView
         # Obtain a session id
         if @sso
             # Connect via SSO token
+            @logger.info "Connecting to #{@url} using SSO token"
             @req.ConnectToProvider do |xml|
                 xml.ClientXMLVersion CLIENT_XML_VERSION
                 xml.sso @sso
@@ -86,6 +91,7 @@ class SmartView
             end
         else
             # Connect via userid and password
+            @logger.info "Connecting to #{@url} using userid/password"
             @req.ConnectToProvider do |xml|
                 xml.ClientXMLVersion CLIENT_XML_VERSION
                 xml.usr @user
@@ -99,7 +105,7 @@ class SmartView
     end
 
 
-    # Open an application via the current provider
+    # Open an application via the configured SmartView provider.
     def open_app(server, app, cube)
         raise NotConnectedError, "No provider connection established" unless @session_id && @provider
 
@@ -108,6 +114,7 @@ class SmartView
         @alias_table = 'none'
 
         # Connect to application
+        @logger.info "Opening cube #{app}.#{cube} on #{server}"
         @req.OpenApplication do |xml|
             xml.sID @session_id
             if @sso
@@ -145,12 +152,15 @@ class SmartView
 
     # Disconnect from the application
     def disconnect
-        @req.Logout do |xml|
-            xml.sID @session_id
+        if @session_id
+            @logger.info "Disconnecting from #{@provider}"
+            @req.Logout do |xml|
+                xml.sID @session_id
+            end
+            invoke
+            @session_id = nil
+            @provider = nil
         end
-        invoke
-        @session_id = nil
-        @provider = nil
     end
 
 
@@ -159,6 +169,7 @@ class SmartView
         # Make sure we are connected
         check_connected
 
+        @logger.info "Retrieving default POV"
         @req.GetDefaultPOV do |xml|
             xml.sID @session_id
             xml.getAtts '0'
@@ -195,6 +206,7 @@ class SmartView
         # Make sure we are connected
         check_connected
 
+        @logger.info "Retrieving default grid"
         @req.GetDefaultGrid do |xml|
             xml.sID @session_id
             @preferences.inject_xml xml
@@ -214,6 +226,7 @@ class SmartView
         # Make sure we are connected
         check_connected
 
+        @logger.info "Refreshing grid"
         @req.Refresh do |xml|
             xml.sID @session_id
             @preferences.inject_xml xml
@@ -245,6 +258,7 @@ class SmartView
 
         grid = Grid.define(@dimensions, pov, rows, cols)
 
+        @logger.info "Retrieving free-form grid"
         @req.ProcessFreeFormGrid do |xml|
             xml.sID @session_id
             @preferences.inject_xml xml
@@ -277,6 +291,7 @@ private
 
     # Retrieve a list of dimensions for the current connection
     def get_dimensions
+        @logger.info "Retrieving list of dimensions"
         @req.EnumDims do |xml|
             xml.sID @session_id
             xml.alsTbl @alias_table
