@@ -4,6 +4,7 @@ class SmartView
         attr_reader :method
 
         def initialize
+            @buffer = ''
             @xml = Builder::XmlMarkup.new(:indent => 2, :target => self)
         end
 
