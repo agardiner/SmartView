@@ -14,11 +14,11 @@ class SmartView
 
     class SmartViewException < RuntimeError
         def initialize(xml)
-            super(xml.at('desc').inner_html)
+            super(xml.at('desc').to_plain_text)
             @err_code = xml['errcode']
             @native_error = xml['native']
             @type = xml['type']
-            @details = xml.at('/details')
+            @details = xml.at('/details').to_plain_text
         end
     end
 
@@ -271,11 +271,6 @@ class SmartView
                     xml.dim :name => dim, :pov => mbr
                 end
             end
-            xml.backgroundpov do |xml|
-                pov.each do |dim,mbr|
-                    xml.dim :name => dim, :pov => mbr
-                end
-            end
             grid.to_xml(xml, false)
             grid.dims_to_xml(xml)
         end
@@ -327,8 +322,10 @@ private
         doc = Hpricot::XML(resp.body.content)
         if !doc.at("//res_#{@req.method}")
             @logger.error "Error invoking SmartView method #{@req.method}"
+            @logger.debug "Request was:\n#{@req}"
+            @logger.debug "Response was:\n#{resp.body.content}"
             if ex = doc.at('//exception')
-                ex = SmartViewException.new(ex)
+                ex = SmartViewException.new(ex.to_plain_text)
                 @logger.error "An exception occurred in #{@req.method}", ex
                 raise ex
             else
