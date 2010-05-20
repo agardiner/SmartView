@@ -24,6 +24,7 @@ class SmartView
 
     class InvalidPreference < RuntimeError; end
     class NotConnected < RuntimeError; end
+    class NotAttached < RuntimeError; end
 
 
     attr_reader :session_id, :provider
@@ -144,9 +145,11 @@ class SmartView
             xml.cube cube
         end
         invoke
-
         @app = app
         @cube = cube
+
+        # Get default POV
+        default_pov
     end
 
 
@@ -160,6 +163,7 @@ class SmartView
             invoke
             @session_id = nil
             @provider = nil
+            @default_pov = nil
         end
     end
 
@@ -203,8 +207,8 @@ class SmartView
 
     # Gets a default grid with the specified POV
     def default_grid
-        # Make sure we are connected
-        check_connected
+        # Make sure we are attached to a cube
+        check_attached
 
         @logger.info "Retrieving default grid"
         @req.GetDefaultGrid do |xml|
@@ -223,8 +227,8 @@ class SmartView
 
     # Refresh a grid from the current provider
     def refresh(grid)
-        # Make sure we are connected
-        check_connected
+        # Make sure we are attached to a cube
+        check_attached
 
         @logger.info "Refreshing grid"
         @req.Refresh do |xml|
@@ -247,8 +251,8 @@ class SmartView
     # The pov is an optional POV that will be merged with the current POV to
     # determine the retrieved POV.
     def free_form_grid(rows, cols, grid_pov=nil)
-        # Make sure we are connected
-        check_connected
+        # Make sure we are attached to a cube
+        check_attached
         get_dimensions unless @dimensions
 
         # Update the POV if one is specified
@@ -286,6 +290,13 @@ private
     # exception if one has not.
     def check_connected
         raise NotConnected unless @session_id && @sso && @provider
+    end
+
+
+    # Checks that a cube is open, raising a NotAttached exception if one is not.
+    def check_attached
+        check_connected
+        raise NotAttached unless @app && @cube
     end
 
 
