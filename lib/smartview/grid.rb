@@ -2,6 +2,9 @@ class SmartView
 
     class InvalidGridSpecification < RuntimeError; end
 
+    # Represents a grid of data, either for a request or as returned by a
+    # SmartView provider.
+    # To create a gird for a request, use the Grid.define method.
     class Grid
 
         include Enumerable
@@ -133,7 +136,9 @@ class SmartView
             Grid.new(dimensions, pov, row_dims, col_dims, row_count, col_count, vals, types)
         end
 
-        attr_reader :row_count, :col_count
+
+        attr_reader :row_count, :col_count, :row_dims, :col_dims, :pov
+
 
         # Creates a new Grid object
         def initialize(dimensions, pov, row_dims, col_dims, row_count, col_count, vals, types)
@@ -151,7 +156,7 @@ class SmartView
         # Retrieve a cell value at the specified row and column intersection.
         def [](row, col)
             val = @vals[row * @col_count + col]
-            val.length > 0 && cell_type(row, col) == GRID_TYPE_DATA ? val.to_f : val
+            val && val.length > 0 && cell_type(row, col) == GRID_TYPE_DATA ? val.to_f : val
         end
 
 
@@ -160,6 +165,18 @@ class SmartView
         # GRID_TYPE_* constants.
         def cell_type(row, col)
             @types[row * @col_count + col]
+        end
+
+
+        # Returns the number of rows needed for the column headers.
+        def header_rows
+            @col_dims.count
+        end
+
+
+        # Returns the number of columns needed for the row headers.
+        def header_cols
+            @row_dims.count
         end
 
 
@@ -196,6 +213,7 @@ class SmartView
         end
 
 
+        # Outputs a list of dimnesions, indicating the axis and position of each
         def dims_to_xml(xml)
             xml.dims do |xml|
                 if @dimensions && @pov
@@ -219,6 +237,7 @@ class SmartView
                 row.join(sep)
             end.join("\n")
         end
+
 
     private
 

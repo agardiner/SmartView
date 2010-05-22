@@ -141,10 +141,24 @@ class SmartView
     end
 
 
+    # Sets the current POV
+    def pov=(new_pov)
+        new_pov
+        @pov = pov.merge(new_pov)
+    end
+
+
+    # Returns a hash indicating the current POV
+    def pov
+        default_pov unless @pov
+        @pov
+    end
+
+
     # Get the default POV
     def default_pov
         # Make sure we are connected
-        check_connected
+        check_attached
 
         @logger.info "Retrieving default POV"
         @req.GetDefaultPOV do |xml|
@@ -160,20 +174,6 @@ class SmartView
         0.upto(dims.size-1) do |i|
             @pov[dims[i]] = mbrs[i]
         end
-        @pov
-    end
-
-
-    # Sets the current POV
-    def pov=(new_pov)
-        new_pov
-        @pov = pov.merge(new_pov)
-    end
-
-
-    # Returns a hash indicating the current POV
-    def pov
-        default_pov unless @pov
         @pov
     end
 
