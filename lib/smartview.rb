@@ -141,6 +141,68 @@ class SmartView
     end
 
 
+    # Retrieve a list of dimensions for the current connection
+    def get_dimensions
+        check_attached
+
+        @logger.info "Retrieving list of dimensions"
+        @req.EnumDims do |xml|
+            xml.sID @session_id
+            xml.alsTbl @alias_table
+        end
+        @dimensions = []
+        invoke.search('//res_EnumDims/dimList/dim').each do |dim|
+            @dimensions[dim['id'].to_i] = dim['name']
+        end
+        @dimensions
+    end
+
+
+    # Returns a list of available member filters for the specified dimension.
+    # A filter can be used to restrict a member query to a certain subset of
+    # members, such as the members in a member list.
+    def get_filters(dimension)
+        check_attached
+
+        @logger.info "Retrieving list of available member filters for #{dimension}"
+        @req.EnumFilters do |xml|
+            xml.sID @session_id
+            xml.dim dimension
+        end
+        doc = invoke
+        filters = []
+        invoke.search('//res_EnumFilters/filterList/filter').each do |filter|
+            filters << filter['name']
+        end
+        filters
+    end
+
+
+    # Retrieves a list of members for the specified dimension, optionally
+    # satisfying a filter.
+    def get_members(dimension, filter='root.[Hierarchy]', all_gens = true)
+        check_attached
+
+        filter, filter_arg = member_to_filter(filter)
+        @logger.info "Retrieving list of members for #{dimension}"
+        @req.EnumMembers do |xml|
+            xml.sID @session_id
+            xml.dim dimension
+            xml.memberFilter do |xml|
+                xml.filter('name' => filter) do |xml|
+                    xml.arg({'id' => 0}, filter_arg) if filter_arg
+                end
+            end
+            xml.getAtts '0'
+            xml.alsTbl @alias_table
+            xml.allGenerations all_gens ? '1' : '0'
+        end
+        doc = invoke
+        members = doc.at('//res_EnumMembers/mbrs').to_plain_text.split('|')
+        members
+    end
+
+
     # Sets the current POV
     def pov=(new_pov)
         new_pov
@@ -268,20 +330,6 @@ private
     end
 
 
-    # Retrieve a list of dimensions for the current connection
-    def get_dimensions
-        @logger.info "Retrieving list of dimensions"
-        @req.EnumDims do |xml|
-            xml.sID @session_id
-            xml.alsTbl @alias_table
-        end
-        @dimensions = []
-        invoke.search('//res_EnumDims/dimList/dim').each do |dim|
-            @dimensions[dim['id'].to_i] = dim['name']
-        end
-    end
-
-
     # Sends the current request XML to the SmartView provider, and parses the
     # response with hpricot.
     # If an exception was returned, an HFMException is raised with the details
@@ -291,7 +339,7 @@ private
         ms = Benchmark.realtime do
             resp = @http.post @url, @req.to_s
         end
-        @logger.info 'SmartView request %s completed in %.1fms' % [@req.method, ms]
+        @logger.info 'SmartView request %s completed in %.1fs' % [@req.method, ms]
         doc = Hpricot::XML(resp.body.content)
         if !doc.at("//res_#{@req.method}")
             @logger.error "Error invoking SmartView method #{@req.method}"
@@ -307,6 +355,14 @@ private
             end
         end
         doc
+    end
+
+
+    # Converts a member specification of the form {mbr.[filter]} to a filter
+    # name and a filter argument.
+    def member_to_filter(member)
+        member =~ /^\{?(?:([^.]+)\.)?(\[[^\]]+\])\}?$/
+        return $2, $1
     end
 
 end
