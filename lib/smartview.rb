@@ -76,6 +76,11 @@ class SmartView
         doc = invoke
         @session_id = doc.at('//res_ConnectToProvider/sID').inner_html
         @provider = doc.at('//res_ConnectToProvider/provider').inner_html
+        @provider_type = case @provider
+            when /Financial Management/ then :HFM
+            when /Analytic Services/ then :Essbase
+            else :Unknown
+        end
     end
 
 
@@ -141,7 +146,7 @@ class SmartView
     end
 
 
-    # Retrieve a list of dimensions for the current connection
+    # Retrieve a list of dimensions for the current connection.
     def get_dimensions
         check_attached
 
@@ -180,8 +185,15 @@ class SmartView
 
     # Retrieves a list of members for the specified dimension, optionally
     # satisfying a filter.
-    def get_members(dimension, filter='root.[Hierarchy]', all_gens = true)
+    def get_members(dimension, filter = nil, all_gens = true)
         check_attached
+
+        if filter.nil?
+            filter = case @provider_type
+            when :HFM then 'root.[Hierarchy]'
+            when :Essbase then "#{dimension}.Descendants"
+            end
+        end
 
         filter, filter_arg = member_to_filter(filter)
         @logger.info "Retrieving list of members for #{dimension}"
@@ -361,7 +373,7 @@ private
     # Converts a member specification of the form {mbr.[filter]} to a filter
     # name and a filter argument.
     def member_to_filter(member)
-        member =~ /^\{?(?:([^.]+)\.)?(\[[^\]]+\])\}?$/
+        member =~ /^\{?(?:([^.]+)\.)?(\[?[^\]]+\]?)\}?$/
         return $2, $1
     end
 
