@@ -215,6 +215,32 @@ class SmartView
     end
 
 
+    # Search for the specified member name or pattern in a dimension.
+    # Returns an array of arrays, each inner array representing a path to a
+    # matching member.
+    # TODO: Implement find for HFM
+    def find_member(dimension, pattern)
+        check_attached
+
+        @logger.info "Finding members of #{dimension} matching '#{pattern}'"
+        @req.FindMember do |xml|
+            xml.sID @session_id
+            xml.dim dimension
+            xml.mbr pattern
+            xml.filter 'name' => 'Hierarchy' do |xml|
+                xml.arg({'id' => '0'}, dimension)
+            end
+            xml.alsTbl @alias_table
+        end
+        doc = invoke
+        path_list = []
+        doc.search('//res_FindMember/pathList/path').each do |path|
+            path_list << path.at('mbrs').to_plain_text.split('|')
+        end
+        path_list
+    end
+
+
     # Sets the current POV
     def pov=(new_pov)
         new_pov
