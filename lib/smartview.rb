@@ -218,7 +218,6 @@ class SmartView
     # Search for the specified member name or pattern in a dimension.
     # Returns an array of arrays, each inner array representing a path to a
     # matching member.
-    # TODO: Implement find for HFM
     def find_member(dimension, pattern)
         check_attached
 
@@ -227,8 +226,15 @@ class SmartView
             xml.sID @session_id
             xml.dim dimension
             xml.mbr pattern
-            xml.filter 'name' => 'Hierarchy' do |xml|
-                xml.arg({'id' => '0'}, dimension)
+            case @provider_type
+                when :Essbase
+                    xml.filter 'name' => 'Hierarchy' do |xml|
+                        xml.arg({'id' => '0'}, dimension)
+                    end
+                when :HFM
+                    xml.filter 'name' => '[Hierarchy]' do |xml|
+                        xml.arg({'id' => '0'}, 'root')
+                    end
             end
             xml.alsTbl @alias_table
         end
