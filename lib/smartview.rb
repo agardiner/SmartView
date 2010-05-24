@@ -18,7 +18,7 @@ class SmartView
             @err_code = xml['errcode']
             @native_error = xml['native']
             @type = xml['type']
-            @details = xml.at('/details').to_plain_text
+            @details = xml.at('/details') && xml.at('/details').to_plain_text
         end
     end
 
@@ -380,8 +380,8 @@ private
 
     # Sends the current request XML to the SmartView provider, and parses the
     # response with hpricot.
-    # If an exception was returned, an HFMException is raised with the details
-    # of the error.
+    # If an exception was returned, an SmartViewException is raised with the
+    # details of the error.
     def invoke
         resp = nil
         ms = Benchmark.realtime do
@@ -394,11 +394,12 @@ private
             @logger.debug "Request was:\n#{@req}"
             @logger.debug "Response was:\n#{resp.body.content}"
             if ex = doc.at('//exception')
-                ex = SmartViewException.new(ex.to_plain_text)
-                @logger.error "An exception occurred in #{@req.method}", ex
+                ex = SmartViewException.new(ex)
+                @logger.error "An exception occurred in #{@req.method}"
+                @logger.error ex
                 raise ex
             else
-                @logger.error "Unexpected response from SmartView provider:\n#{@logger.error doc.to_plain_text}"
+                @logger.error "Unexpected response from SmartView provider:\n#{doc.to_plain_text}"
                 raise RuntimeError, "Unexpected response from SmartView provider: #{doc.to_plain_text}"
             end
         end
