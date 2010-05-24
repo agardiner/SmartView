@@ -35,7 +35,7 @@ class SmartView
             @indent = indent
         end
 
-        def inject_xml(xml)
+        def inject_xml(xml, alias_table = nil)
             xml.preferences do
                 xml.row_suppression :zero => @suppress_zero ? 1 : 0, :invalid => @suppress_invalid ? 1 : 0,
                     :underscore => @suppress_underscore ? 1 : 0, :noaccess => @suppress_noaccess ? 1 : 0
@@ -49,6 +49,7 @@ class SmartView
                 xml.includeDescriptionInLabel :val => @name_and_description ? 1 : 0
                 xml.missingLabelText :val => @missing_text
                 xml.noAccessText :val => @no_access_text
+                xml.aliasTableName :val => alias_table if alias_table
                 xml.essIndent :val => case @indent
                     when /subitems/i then 1
                     when /totals/i then 2
