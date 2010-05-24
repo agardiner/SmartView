@@ -23,6 +23,7 @@ class SmartView
     end
 
     class InvalidPreference < RuntimeError; end
+    class AlreadyConnected < RuntimeError; end
     class NotConnected < RuntimeError; end
     class NotAttached < RuntimeError; end
 
@@ -54,6 +55,10 @@ class SmartView
     # The SSO method will be used if the sso instance variable is set;
     # otherwise, the userid and password will be used.
     def connect
+        if @provider
+            raise AlreadyConnected, "Cannot change provider once connected" if @provider
+        end
+
         # Obtain a session id
         if @sso
             # Connect via SSO token
@@ -75,12 +80,7 @@ class SmartView
         end
         doc = invoke
         @session_id = doc.at('//res_ConnectToProvider/sID').inner_html
-        @provider = doc.at('//res_ConnectToProvider/provider').inner_html
-        @provider_type = case @provider
-            when /Financial Management/ then :HFM
-            when /Analytic Services/ then :Essbase
-            else :Unknown
-        end
+        set_provider doc.at('//res_ConnectToProvider/provider').inner_html
     end
 
 
@@ -131,16 +131,17 @@ class SmartView
     end
 
 
-    # Disconnect from the application
-    def disconnect
-        if @session_id
-            @logger.info "Disconnecting from #{@provider}"
+    # Close the connection to the current application cube.
+    def close_app
+        if @session_id && @app
+            @logger.info "Disconnecting from #{@app}.#{@cube}"
             @req.Logout do |xml|
                 xml.sID @session_id
             end
             invoke
-            @session_id = nil
-            @provider = nil
+            @app = nil
+            @cube = nil
+            @dimensions = nil
             @default_pov = nil
         end
     end
@@ -185,24 +186,17 @@ class SmartView
 
     # Retrieves a list of members for the specified dimension, optionally
     # satisfying a filter.
-    def get_members(dimension, filter = nil, all_gens = true)
+    def get_members(dimension, filter = default_filter(dimension), all_gens = true)
         check_attached
 
-        if filter.nil?
-            filter = case @provider_type
-            when :HFM then 'root.[Hierarchy]'
-            when :Essbase then "#{dimension}.Descendants"
-            end
-        end
-
-        filter, filter_arg = member_to_filter(filter)
+        filter, filter_args = member_to_filter(filter)
         @logger.info "Retrieving list of members for #{dimension}"
         @req.EnumMembers do |xml|
             xml.sID @session_id
             xml.dim dimension
             xml.memberFilter do |xml|
                 xml.filter('name' => filter) do |xml|
-                    xml.arg({'id' => 0}, filter_arg) if filter_arg
+                    insert_filter_args xml, filter_args
                 end
             end
             xml.getAtts '0'
@@ -226,15 +220,9 @@ class SmartView
             xml.sID @session_id
             xml.dim dimension
             xml.mbr pattern
-            case @provider_type
-                when :Essbase
-                    xml.filter 'name' => 'Hierarchy' do |xml|
-                        xml.arg({'id' => '0'}, dimension)
-                    end
-                when :HFM
-                    xml.filter 'name' => '[Hierarchy]' do |xml|
-                        xml.arg({'id' => '0'}, 'root')
-                    end
+            filter_name, filter_args = process_filter(dimension)
+            xml.filter 'name' => filter_name do |xml|
+                insert_filter_args xml, filter_args
             end
             xml.alsTbl @alias_table
         end
@@ -360,6 +348,22 @@ class SmartView
 
 private
 
+    # Loads provider-specific functionality
+    def set_provider(provider)
+        @provider = provider
+        case @provider
+            when /Financial Management/
+                require 'smartview/hfm_provider'
+                self.extend HFMProvider
+                @provider_type = :HFM
+            when /Analytic Services/
+                require 'smartview/essbase_provider'
+                self.extend EssbaseProvider
+                @provider_type = :Essbase
+        end
+    end
+
+
     # Checks to see that a session has been established, raising a NotConnected
     # exception if one has not.
     def check_connected
@@ -407,6 +411,16 @@ private
     def member_to_filter(member)
         member =~ /^\{?(?:([^.]+)\.)?(\[?[^\]]+\]?)\}?$/
         return $2, $1
+    end
+
+
+    # Insert filter arguments to a request
+    def insert_filter_args(xml, filter_args)
+        if filter_args
+            filter_args.each_with_index do |filter_arg, i|
+                xml.arg({'id' => "#{i}"}, filter_arg)
+            end
+        end
     end
 
 end
