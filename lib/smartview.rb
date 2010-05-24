@@ -342,7 +342,10 @@ class SmartView
             grid.dims_to_xml(xml)
         end
         doc = invoke
-        Grid.from_xml(doc)
+        grid = Grid.from_xml(doc)
+
+        # The grid returned does not contain data, so perform a refresh
+        refresh(grid)
     end
 
 
