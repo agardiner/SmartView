@@ -1,0 +1,37 @@
+<req_ListCubes>
+<sID>93873</sID>
+<srv>wscrunad0035</srv>
+<app>RACE_Rpt</app>
+</req_ListCubes>
+
+<res_ListCubes>
+<cubes enc="1">RACE_Rpt</cubes>
+</res_ListCubes>
+
+<req_EnumBusinessRules>
+<sID>93873</sID>
+<cube>RACE_Rpt</cube>
+<runOnSave>0</runOnSave>
+</req_EnumBusinessRules>
+
+<res_EnumBusinessRules>
+<sID>93873</sID>
+<rules>
+  <rule type="type" rtp="0">Default</rule>
+  <rule type="type" rtp="0">AggAct</rule>
+  <rule type="type" rtp="0">AggRstmt</rule>
+  <rule type="type" rtp="0">ClrAct</rule>
+  <rule type="type" rtp="0">ClrRstmt</rule>
+</rules>
+</res_EnumBusinessRules>
+
+<req_LaunchBusinessRule>
+<sID>93873</sID>
+<cube>RACE_Rpt</cube>
+<rule type="type">ClrRstmt</rule>
+<prompts/>
+</req_LaunchBusinessRule>
+
+<res_LaunchBusinessRule>
+<bid>11</bid>
+</res_LaunchBusinessRule>

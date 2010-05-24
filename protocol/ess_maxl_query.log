@@ -1,0 +1,99 @@
+<req_ExecuteQuery>
+<sID>93873</sID>
+<preferences>
+  <row_suppression zero="0" invalid="0" missing="0" underscore="0" noaccess="0"/>
+  <celltext val="1"/>
+  <zoomin ancestor="bottom" mode="base"/>
+  <navigate withData="1"/>
+  <includeSelection val="1"/>
+  <repeatMemberLabels val="1"/>
+  <withinSelectedGroup val="0"/>
+  <removeUnSelectedGroup val="0"/>
+  <includeDescriptionInLabel val="2"/>
+  <missingLabelText val="#missing"/>
+  <noAccessText val="#numericzero"/>
+  <invalidLabelText val="#Invalid"/>
+  <aliasTableName val="none"/>
+  <essIndent val="1"/>
+</preferences>
+<mdx>SELECT {[Scenario].[Actual]} ON COLUMNS, {[Entity].[H01_Stat]} ON ROWS</mdx>
+</req_ExecuteQuery>
+
+<exception errcode="4" type="error">
+<desc>Cannot perform cube view operation. OLAP error (1260046): Unknown Member Entity.H01_Stat used in query</desc>
+</exception>
+
+<req_ExecuteQuery>
+<sID>93873</sID>
+<preferences>
+  <row_suppression zero="0" invalid="0" missing="0" underscore="0" noaccess="0"/>
+  <celltext val="1"/>
+  <zoomin ancestor="bottom" mode="base"/>
+  <navigate withData="1"/>
+  <includeSelection val="1"/>
+  <repeatMemberLabels val="1"/>
+  <withinSelectedGroup val="0"/>
+  <removeUnSelectedGroup val="0"/>
+  <includeDescriptionInLabel val="2"/>
+  <missingLabelText val="#missing"/>
+  <noAccessText val="#numericzero"/>
+  <invalidLabelText val="#Invalid"/>
+  <aliasTableName val="none"/>
+  <essIndent val="1"/>
+</preferences>
+<mdx>SELECT {[Scenario].[Actual]} ON COLUMNS, {[Statutory].[H01_Stat]} ON ROWS</mdx>
+</req_ExecuteQuery>
+
+<res_ExecuteQuery>
+<sID>93873</sID>
+<grid>
+  <cube/>
+  <gridType>0</gridType>
+  <dims>
+    <dim id="0" name="Scenario" col="0" expand="0"/>
+    <dim id="1" name="Statutory" row="0" expand="0"/>
+    <dim id="2" name="Account" pov="Account" expand="0"/>
+    <dim id="3" name="Value" pov="Value" expand="0"/>
+    <dim id="4" name="View" pov="View" expand="0"/>
+    <dim id="5" name="Years" pov="Years" expand="0"/>
+    <dim id="6" name="Period" pov="Period" expand="0"/>
+    <dim id="7" name="Custom1" pov="Custom1" expand="0"/>
+    <dim id="8" name="Custom2" pov="Custom2" expand="0"/>
+    <dim id="9" name="Custom3" pov="Custom3" expand="0"/>
+    <dim id="10" name="Custom4" pov="Custom4" expand="0"/>
+    <dim id="11" name="ICP" pov="ICP" expand="0"/>
+    <dim id="12" name="Management" pov="Management" expand="0"/>
+  </dims>
+  <preferences>
+    <row_suppression zero="0" invalid="0" missing="0" underscore="0" error="0" derived="0" noaccess="0"/>
+    <col_suppression zero="0" invalid="0" missing="0" underscore="0" error="0" derived="0" noaccess="0"/>
+    <celltext val="1"/>
+    <itemdetails val="0"/>
+    <offline val="0"/>
+    <zoomin ancestor="bottom"/>
+    <zoomin mode="base"/>
+    <navigate withData="1"/>
+    <includeSelection val="1"/>
+    <repeatMemberLabels val="1"/>
+    <withinSelectedGroup val="0"/>
+    <removeUnSelectedGroup val="0"/>
+    <includeDescriptionInLabel val="2"/>
+    <missingLabelText val="#missing"/>
+    <noAccessText val="#numericzero"/>
+    <aliasTableName val="none"/>
+  </preferences>
+  <slices>
+    <slice rows="2" cols="2">
+      <data>
+        <range start="0" end="3">
+          <vals enc="1">|Actual|H01_Stat|#MISSING</vals>
+          <types enc="1">7|0|0|2</types>
+          <status enc="1">0|0|0|8193</status>
+          <txts enc="1">|||</txts>
+          <filters enc="1">|||</filters>
+        </range>
+      </data>
+    </slice>
+  </slices>
+</grid>
+</res_ExecuteQuery>

@@ -1,0 +1,70 @@
+<req_GetDimensionsInfo>
+<sID>93873</sID>
+<dims enc="0">Statutory</dims>
+<alsTbl>none</alsTbl>
+<options>ATTRIBUTES</options>
+</req_GetDimensionsInfo>
+
+<res_GetDimensionsInfo>
+<sID>93873</sID>
+<dims>Statutory</dims>
+<properties>
+  <childCount>5</childCount>
+  <levels>7</levels>
+  <unique>1</unique>
+  <share>0</share>
+  <consolid>0</consolid>
+  <storageCategory>0</storageCategory>
+  <linkedAttrAttachLevel>0</linkedAttrAttachLevel>
+  <attrAssocLevel>0</attrAssocLevel>
+</properties>
+<attribList>
+  <attribs enc="1">LeadCluster|CountryOfOperation</attribs>
+</attribList>
+<attribTypeList>
+  <attribTypes enc="1">string|string</attribTypes>
+</attribTypeList>
+<attribValueList>
+  <attribValues enc="1">LeadCluster|CountryOfOperation</attribValues>
+</attribValueList>
+</res_GetDimensionsInfo>
+
+<req_EnumMembers>
+<sID>93873</sID>
+<dim>LeadCluster</dim>
+<memberFilter>
+  <filter name="Children">
+    <arg id="0">LeadCluster</arg>
+  </filter>
+</memberFilter>
+<getAtts>1</getAtts>
+<alsTbl>none</alsTbl>
+<allGenerations>0</allGenerations>
+</req_EnumMembers>
+
+<res_EnumMembers>
+<overflow>0</overflow>
+<mbrs enc="1">LC000|LCN01|LC030|LC040|LC050|LC060|LCN02|LC130|LC170|LC180</mbrs>
+<atts enc="1">0|0|0|0|0|0|0|0|0|0</atts>
+<mbrDesc enc="1">|||||||||</mbrDesc>
+</res_EnumMembers>
+
+<req_EnumMembers>
+<sID>93873</sID>
+<dim>CountryOfOperation</dim>
+<memberFilter>
+  <filter name="Children">
+    <arg id="0">CountryOfOperation</arg>
+  </filter>
+</memberFilter>
+<getAtts>1</getAtts>
+<alsTbl>none</alsTbl>
+<allGenerations>0</allGenerations>
+</req_EnumMembers>
+
+<res_EnumMembers>
+<overflow>0</overflow>
+<mbrs enc="1">BoE_AI|BoE_AF|BoE_AL|BoE_DZ|BoE_AD|BoE_AO|BoE_AG|BoE_AA|BoE_AR|BoE_AM|BoE_AW|BoE_AU|BoE_AT|BoE_AZ|BoE_BS|BoE_BH|BoE_BD|BoE_BB|BoE_BY|BoE_BE|BoE_BZ|BoE_BJ|BoE_BM|BoE_BT|BoE_BO|BoE_BA|BoE_BW|BoE_BR|BoE_BQ|BoE_BC|BoE_BV|BoE_BN|BoE_BG|BoE_BF|BoE_BI|BoE_KH|BoE_CM|BoE_CA|BoE_CT|BoE_CV|BoE_KY|BoE_CF|BoE_TD|BoE_CL|BoE_CN|BoE_CO|BoE_KM|BoE_CG|BoE_CD|BoE_CR|BoE_CI|BoE_HR|BoE_CU|BoE_CY|BoE_CZ|BoE_DK|BoE_DJ|BoE_DM|BoE_DO|BoE_DU|BoE_TL|BoE_EC|BoE_EG|BoE_SV|BoE_GQ|BoE_EA|BoE_EE|BoE_ET|BoE_FA|BoE_FK|BoE_FJ|BoE_FI|BoE_FR|BoE_GF|BoE_PF|BoE_FT|BoE_GA|BoE_GM|BoE_GE|BoE_DE|BoE_GH|BoE_GI|BoE_GR|BoE_GL|BoE_GD|BoE_GU|BoE_GT|BoE_GG|BoE_GN|BoE_GW|BoE_GY|BoE_HT|BoE_HN|BoE_HK|BoE_HU|BoE_IS|BoE_IN|BoE_ID|BoE_IR|BoE_IQ|BoE_IE|BoE_IM|BoE_IL|BoE_IT|BoE_JM|BoE_JP|BoE_JE|BoE_JO|BoE_KZ|BoE_KE|BoE_KI|BoE_KP|BoE_KR|BoE_KW|BoE_KG|BoE_LA|BoE_LV|BoE_LB|BoE_LS|BoE_LR|BoE_LY|BoE_LI|BoE_LT|BoE_LU|BoE_MO|BoE_MK|BoE_MG|BoE_MW|BoE_MY|BoE_MV|BoE_ML|BoE_MT|BoE_MH|BoE_MQ|BoE_MR|BoE_MU|BoE_YT|BoE_MX|BoE_FM|BoE_MD|BoE_MC|BoE_MN|BoE_MS|BoE_MA|BoE_MZ|BoE_MM|BoE_NA|BoE_NR|BoE_NP|BoE_NL|BoE_AN|BoE_NC|BoE_NZ|BoE_NI|BoE_NE|BoE_NG|BoE_NO|BoE_OM|BoE_UE|BoE_PK|BoE_PS|BoE_PW|BoE_PA|BoE_PG|BoE_PY|BoE_PE|BoE_PH|BoE_PI|BoE_PL|BoE_PT|BoE_QA|BoE_RE|BoE_RO|BoE_RU|BoE_RW|BoE_SH|BoE_SQ|BoE_LC|BoE_PM|BoE_VC|BoE_WS|BoE_SM|BoE_ST|BoE_SA|BoE_SN|BoE_CS|BoE_SC|BoE_SL|BoE_SG|BoE_SK|BoE_SI|BoE_SB|BoE_SO|BoE_ZA|BoE_ES|BoE_LK|BoE_SD|BoE_SR|BoE_SZ|BoE_SE|BoE_CH|BoE_SY|BoE_TW|BoE_TJ|BoE_TZ|BoE_TH|BoE_TG|BoE_TO|BoE_TT|BoE_TN|BoE_TR|BoE_TM|BoE_TC|BoE_TV|BoE_UG|BoE_UA|BoE_US|BoE_PU|BoE_UV|BoE_UY|BoE_UZ|BoE_VU|BoE_VA|BoE_VE|BoE_VN|BoE_WF|BoE_WH|BoE_YE|BoE_ZM|BoE_ZW|BoE_GB|BoE_AE|BoE_VG|BoE_KN</mbrs>
+<atts enc="1">0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0</atts>
+<mbrDesc enc="1">|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||</mbrDesc>
+</res_EnumMembers>
