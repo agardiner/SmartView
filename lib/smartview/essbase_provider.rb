@@ -26,7 +26,7 @@ class SmartView
             @logger.info "Executing MDX query: #{mdx}"
             @req.ExecuteQuery do |xml|
                 xml.sID @session_id
-                @preferences.inject_xml xml, @alias_table
+                @preferences.inject_xml xml, @provider_type
                 xml.mdx mdx
             end
             doc = invoke

@@ -22,7 +22,6 @@ class SmartView
         end
     end
 
-    class InvalidPreference < RuntimeError; end
     class AlreadyConnected < RuntimeError; end
     class NotConnected < RuntimeError; end
     class NotAttached < RuntimeError; end
@@ -45,6 +44,15 @@ class SmartView
             logger = Logger.new(STDOUT)
         end
         @logger = logger
+    end
+
+
+    # Sets the preferences to be applied to this session.
+    def preferences=(prefs)
+        unless prefs.kind_of? Preferences
+            raise InvalidPreference, "Preference settings must be an instance of SmartView::Preferences"
+        end
+        @preferences = prefs
     end
 
 
@@ -90,7 +98,6 @@ class SmartView
 
         # Reset app state
         @dimensions = nil
-        @alias_table = 'none'
 
         # Connect to application
         @logger.info "Opening cube #{app}.#{cube} on #{server}"
@@ -154,7 +161,7 @@ class SmartView
         @logger.info "Retrieving list of dimensions"
         @req.EnumDims do |xml|
             xml.sID @session_id
-            xml.alsTbl @alias_table
+            xml.alsTbl @preferences.alias_table
         end
         @dimensions = []
         invoke.search('//res_EnumDims/dimList/dim').each do |dim|
@@ -200,7 +207,7 @@ class SmartView
                 end
             end
             xml.getAtts '0'
-            xml.alsTbl @alias_table
+            xml.alsTbl @preferences.alias_table
             xml.allGenerations all_gens ? '1' : '0'
         end
         doc = invoke
@@ -224,7 +231,7 @@ class SmartView
             xml.filter 'name' => filter_name do |xml|
                 insert_filter_args xml, filter_args
             end
-            xml.alsTbl @alias_table
+            xml.alsTbl @preferences.alias_table
         end
         doc = invoke
         path_list = []
@@ -258,7 +265,7 @@ class SmartView
         @req.GetDefaultPOV do |xml|
             xml.sID @session_id
             xml.getAtts '0'
-            xml.alsTbl @alias_table
+            xml.alsTbl @preferences.alias_table
         end
         doc = invoke
         dims = doc.at('//res_GetDefaultPOV/dims').to_plain_text.split('|')
@@ -280,7 +287,7 @@ class SmartView
         @logger.info "Retrieving default grid"
         @req.GetDefaultGrid do |xml|
             xml.sID @session_id
-            @preferences.inject_xml xml
+            @preferences.inject_xml xml, @provider_type
             xml.backgroundpov do |xml|
                 pov.each do |dim,mbr|
                     xml.dim :name => dim, :pov => mbr
@@ -300,7 +307,7 @@ class SmartView
         @logger.info "Refreshing grid"
         @req.Refresh do |xml|
             xml.sID @session_id
-            @preferences.inject_xml xml
+            @preferences.inject_xml xml, @provider_type
             grid.to_xml(xml)
         end
         doc = invoke
@@ -332,7 +339,7 @@ class SmartView
         @logger.info "Retrieving free-form grid"
         @req.ProcessFreeFormGrid do |xml|
             xml.sID @session_id
-            @preferences.inject_xml xml
+            @preferences.inject_xml xml, @provider_type
             xml.backgroundpov do |xml|
                 pov.each do |dim,mbr|
                     xml.dim :name => dim, :pov => mbr
