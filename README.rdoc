@@ -9,7 +9,8 @@ Hyperion(r) SmartView for Office is a Microsoft Office Add-In that allows Office
 The SmartView Add-In communicates with SmartView Providers via XML over HTTP. This protocol is not published, but is fairly straightforward to reverse engineer. Providers appear to use a common protocol, albeit with some small differences depending on the data source.
 
 == SmartView Gem
-The SmartView gem provides a Ruby implementation of the SmnartView protocol, allowing Ruby programs to act as clients to SmartView providers. The SmartView gem hides the details of the protocol, and provides a relatively simple interface for Ruby programs that wish to retrieve data and metadata from Hperion Essbase and Financial Management.
+
+The SmartView gem provides a Ruby implementation of the SmartView protocol, allowing Ruby programs to act as clients to SmartView providers. The SmartView gem hides the details of the protocol, and provides a relatively simple interface for Ruby programs that wish to retrieve data and metadata from Hperion Essbase and Financial Management.
 
 == Installation
 
@@ -45,6 +46,28 @@ Now that you have the SmartView gem installed, you are ready to interact with a 
     #  BS   7890.12 8910.12
 
     sm.close_app
+
+== Retrieving Metadata
+
+The SmartView gem provides a number of methods for obtaining metadata from a SmartView provider.
+
+=== SmartView#get_dimensions
+
+Returns a list of the dimensions within the current cube.
+
+Note: For Essbase cubes, this method does not return attribute dimensions. Support for obtaining additional metadata about individual dimensions, including the attribute dimensions to which they are linked, will be added shortly.
+
+=== SmartView#get_filters
+
+Returns a list of available filters for a dimension. This includes standard hierarchical filters, which vary by provider and dimension type, but are otherwise common across cubes, as well as custom member lists for HFM data sources.
+
+=== SmartView#get_members
+
+Returns a list of members in a dimension, optionally filtered by a filter specification.
+
+=== SmartView#find_member
+
+Returns a list of member names within a dimension that match the specified member name pattern.
 
 == License
 
