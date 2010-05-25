@@ -28,7 +28,7 @@ class SmartView
 
 
     attr_reader :session_id, :provider
-    attr_accessor :user, :password, :sso
+    attr_reader :user, :sso
     attr_reader :preferences
 
 
@@ -60,16 +60,17 @@ class SmartView
     # Two methods of connection are supported:
     # 1. Userid and password
     # 2. SSO token
-    # The SSO method will be used if the sso instance variable is set;
-    # otherwise, the userid and password will be used.
-    def connect
+    # If only a single parameter is passed, the SSO method is assumed; if two
+    # parameters are passed, these are assumed to be userid and password.
+    def connect(user_or_sso, password = nil)
         if @provider
             raise AlreadyConnected, "Cannot change provider once connected" if @provider
         end
 
         # Obtain a session id
-        if @sso
+        if password.nil?
             # Connect via SSO token
+            @sso = user_or_sso
             @logger.info "Connecting to #{@url} using SSO token"
             @req.ConnectToProvider do |xml|
                 xml.ClientXMLVersion CLIENT_XML_VERSION
@@ -78,6 +79,8 @@ class SmartView
             end
         else
             # Connect via userid and password
+            @user = user_or_sso
+            @password = password
             @logger.info "Connecting to #{@url} using userid/password"
             @req.ConnectToProvider do |xml|
                 xml.ClientXMLVersion CLIENT_XML_VERSION
@@ -120,6 +123,7 @@ class SmartView
                 xml.sID @session_id
             end
             @sso = invoke.at('//res_GetSSOToken/sso').inner_html
+            @password = nil     # Don't remember password any longer than we need to
         end
 
         # Open cube
