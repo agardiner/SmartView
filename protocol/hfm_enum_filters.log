@@ -1,0 +1,236 @@
+<req_EnumDims>
+<sID>{4C6AD1FF-15B8-4de2-80F1-59ED308B5903}</sID>
+<alsTbl>none</alsTbl>
+</req_EnumDims>
+
+<res_EnumDims>
+<dimList>
+  <dim id="0" keepParent="0" name="Scenario" OBP="0" type="Scenario" alias="Scenario"/>
+  <dim id="1" keepParent="0" name="Year" OBP="0" type="Year" alias="Year"/>
+  <dim id="2" keepParent="0" name="Period" OBP="0" type="Period" alias="Period"/>
+  <dim id="3" keepParent="0" name="View" OBP="0" type="View" alias="View"/>
+  <dim id="4" keepParent="1" name="Entity" OBP="0" type="Entity" alias="Entity"/>
+  <dim id="5" keepParent="0" name="Value" OBP="0" type="Value" alias="Value"/>
+  <dim id="6" keepParent="0" name="Account" OBP="0" type="Account" alias="Account"/>
+  <dim id="7" keepParent="0" name="ICP" OBP="0" type="ICP" alias="ICP"/>
+  <dim id="8" keepParent="0" name="Custom1" OBP="0" type="Custom1" alias="Custom1"/>
+  <dim id="9" keepParent="0" name="Custom2" OBP="0" type="Custom2" alias="Custom2"/>
+  <dim id="10" keepParent="0" name="Custom3" OBP="0" type="Custom3" alias="Custom3"/>
+  <dim id="11" keepParent="0" name="Custom4" OBP="0" type="Custom4" alias="Custom4"/>
+</dimList>
+</res_EnumDims>
+
+<req_EnumFilters>
+<sID>{4C6AD1FF-15B8-4de2-80F1-59ED308B5903}</sID>
+<dim>Scenario</dim>
+</req_EnumFilters>
+
+<res_EnumFilters>
+<filterList>
+  <filter name="[Hierarchy]"/>
+  <filter name="[Descendants]"/>
+  <filter name="[Supports Process Management]"/>
+  <filter name="[Ancestors]">
+    <arg id="0" name="top" type="str"/>
+  </filter>
+  <filter name="[Parents]">
+    <arg id="0" name="top" type="str"/>
+  </filter>
+</filterList>
+</res_EnumFilters>
+
+<req_EnumFilters>
+<sID>{4C6AD1FF-15B8-4de2-80F1-59ED308B5903}</sID>
+<dim>Year</dim>
+</req_EnumFilters>
+<res_EnumFilters>
+<filterList>
+  <filter name="[Hierarchy]"/>
+  <filter name="[Descendants]"/>
+</filterList>
+</res_EnumFilters>
+
+<req_EnumFilters>
+<sID>{4C6AD1FF-15B8-4de2-80F1-59ED308B5903}</sID>
+<dim>View</dim>
+</req_EnumFilters>
+<res_EnumFilters>
+<filterList>
+  <filter name="[Hierarchy]"/>
+  <filter name="[Descendants]"/>
+</filterList>
+</res_EnumFilters>
+
+<req_EnumFilters>
+<sID>{4C6AD1FF-15B8-4de2-80F1-59ED308B5903}</sID>
+<dim>Entity</dim>
+</req_EnumFilters>
+
+<res_EnumFilters>
+<filterList>
+  <filter name="[Hierarchy]">
+    <arg id="0" name="top" type="str"/>
+  </filter>
+  <filter name="[Descendants]">
+    <arg id="0" name="top" type="str"/>
+  </filter>
+  <filter name="[Children]">
+    <arg id="0" name="top" type="str"/>
+  </filter>
+  <filter name="[Base]">
+    <arg id="0" name="top" type="str"/>
+  </filter>
+  <filter name="[Adjustment Entities]"/>
+  <filter name="[Parent Adjustment Entities]"/>
+  <filter name="[Ancestors]">
+    <arg id="0" name="top" type="str"/>
+  </filter>
+  <filter name="[Parents]">
+    <arg id="0" name="top" type="str"/>
+  </filter>
+  <filter name="SUs"/>
+  <filter name="Solus Subsidiaries"/>
+  <filter name="B PLC Subsidiaries"/>
+  <filter name="BB PLC Subsidiaries"/>
+  <filter name="Branches"/>
+</filterList>
+</res_EnumFilters>
+
+<req_EnumFilters>
+<sID>{4C6AD1FF-15B8-4de2-80F1-59ED308B5903}</sID>
+<dim>Value</dim>
+</req_EnumFilters>
+
+<res_EnumFilters>
+<filterList>
+  <filter name="[Hierarchy]"/>
+  <filter name="[Descendants]"/>
+  <filter name="[Inputs]"/>
+  <filter name="[Adjustments]"/>
+  <filter name="[Totals]"/>
+  <filter name="[Default Currencies]"/>
+</filterList>
+</res_EnumFilters>
+
+<req_EnumFilters>
+<sID>{4C6AD1FF-15B8-4de2-80F1-59ED308B5903}</sID>
+<dim>ICP</dim>
+</req_EnumFilters>
+
+<res_EnumFilters>
+<filterList>
+  <filter name="[Hierarchy]">
+    <arg id="0" name="top" type="str"/>
+  </filter>
+  <filter name="[Descendants]">
+    <arg id="0" name="top" type="str"/>
+  </filter>
+  <filter name="[Children]">
+    <arg id="0" name="top" type="str"/>
+  </filter>
+  <filter name="[Base]"/>
+  <filter name="[System]"/>
+  <filter name="[Ancestors]">
+    <arg id="0" name="top" type="str"/>
+  </filter>
+  <filter name="[Parents]">
+    <arg id="0" name="top" type="str"/>
+  </filter>
+  <filter name="BB PLC Solus"/>
+  <filter name="BB PLC Subsidiaries"/>
+  <filter name="B PLC Solus"/>
+  <filter name="B PLC Subsidiaries"/>
+  <filter name="BB PLC Solus - SuMus"/>
+  <filter name="BB PLC Subsidiaries - SuMus"/>
+  <filter name="B PLC Solus - SuMus"/>
+  <filter name="B PLC Subsidiaries - SuMus"/>
+</filterList>
+</res_EnumFilters>
+
+<req_EnumFilters>
+<sID>{4C6AD1FF-15B8-4de2-80F1-59ED308B5903}</sID>
+<dim>Custom1</dim>
+</req_EnumFilters>
+
+<res_EnumFilters>
+<filterList>
+  <filter name="[Hierarchy]">
+    <arg id="0" name="top" type="str"/>
+  </filter>
+  <filter name="[Descendants]">
+    <arg id="0" name="top" type="str"/>
+  </filter>
+  <filter name="[Children]">
+    <arg id="0" name="top" type="str"/>
+  </filter>
+  <filter name="[Base]">
+    <arg id="0" name="top" type="str"/>
+  </filter>
+  <filter name="[Currencies]"/>
+  <filter name="[Ancestors]">
+    <arg id="0" name="top" type="str"/>
+  </filter>
+  <filter name="[Parents]">
+    <arg id="0" name="top" type="str"/>
+  </filter>
+  <filter name="[ConsolMethods]"/>
+  <filter name="C1 Elimination Extract"/>
+</filterList>
+</res_EnumFilters>
+
+<req_EnumFilters>
+<sID>{4C6AD1FF-15B8-4de2-80F1-59ED308B5903}</sID>
+<dim>Custom2</dim>
+</req_EnumFilters>
+
+<res_EnumFilters>
+<filterList>
+  <filter name="[Hierarchy]">
+    <arg id="0" name="top" type="str"/>
+  </filter>
+  <filter name="[Descendants]">
+    <arg id="0" name="top" type="str"/>
+  </filter>
+  <filter name="[Children]">
+    <arg id="0" name="top" type="str"/>
+  </filter>
+  <filter name="[Base]">
+    <arg id="0" name="top" type="str"/>
+  </filter>
+  <filter name="[Currencies]"/>
+  <filter name="[Ancestors]">
+    <arg id="0" name="top" type="str"/>
+  </filter>
+  <filter name="[Parents]">
+    <arg id="0" name="top" type="str"/>
+  </filter>
+</filterList>
+</res_EnumFilters>
+
+<req_EnumFilters>
+<sID>{4C6AD1FF-15B8-4de2-80F1-59ED308B5903}</sID>
+<dim>Custom3</dim>
+</req_EnumFilters>
+
+<res_EnumFilters>
+<filterList>
+  <filter name="[Hierarchy]">
+    <arg id="0" name="top" type="str"/>
+  </filter>
+  <filter name="[Descendants]">
+    <arg id="0" name="top" type="str"/>
+  </filter>
+  <filter name="[Children]">
+    <arg id="0" name="top" type="str"/>
+  </filter>
+  <filter name="[Base]">
+    <arg id="0" name="top" type="str"/>
+  </filter>
+  <filter name="[Ancestors]">
+    <arg id="0" name="top" type="str"/>
+  </filter>
+  <filter name="[Parents]">
+    <arg id="0" name="top" type="str"/>
+  </filter>
+</filterList>
+</res_EnumFilters>

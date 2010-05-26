@@ -25,6 +25,7 @@ class SmartView
     class AlreadyConnected < RuntimeError; end
     class NotConnected < RuntimeError; end
     class NotAttached < RuntimeError; end
+    class UnrecognisedFilterExpression < RuntimeError; end
 
 
     attr_reader :session_id, :provider
@@ -197,16 +198,16 @@ class SmartView
 
     # Retrieves a list of members for the specified dimension, optionally
     # satisfying a filter.
-    def get_members(dimension, filter = default_filter(dimension), all_gens = true)
+    def get_members(dimension, filter_spec = nil, all_gens = true)
         check_attached
 
-        filter, filter_args = member_to_filter(filter)
+        filter_name, filter_args = process_filter(dimension, filter_spec)
         @logger.info "Retrieving list of members for #{dimension}"
         @req.EnumMembers do |xml|
             xml.sID @session_id
             xml.dim dimension
             xml.memberFilter do |xml|
-                xml.filter('name' => filter) do |xml|
+                xml.filter('name' => filter_name) do |xml|
                     insert_filter_args xml, filter_args
                 end
             end
@@ -223,15 +224,15 @@ class SmartView
     # Search for the specified member name or pattern in a dimension.
     # Returns an array of arrays, each inner array representing a path to a
     # matching member.
-    def find_member(dimension, pattern)
+    def find_member(dimension, pattern, filter_spec = nil)
         check_attached
 
+        filter_name, filter_args = process_filter(dimension, filter_spec)
         @logger.info "Finding members of #{dimension} matching '#{pattern}'"
         @req.FindMember do |xml|
             xml.sID @session_id
             xml.dim dimension
             xml.mbr pattern
-            filter_name, filter_args = process_filter(dimension)
             xml.filter 'name' => filter_name do |xml|
                 insert_filter_args xml, filter_args
             end
@@ -418,14 +419,6 @@ private
             end
         end
         doc
-    end
-
-
-    # Converts a member specification of the form {mbr.[filter]} to a filter
-    # name and a filter argument.
-    def member_to_filter(member)
-        member =~ /^\{?(?:([^.]+)\.)?(\[?[^\]]+\]?)\}?$/
-        return $2, $1
     end
 
 
