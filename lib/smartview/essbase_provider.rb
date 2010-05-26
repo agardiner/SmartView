@@ -9,13 +9,23 @@ class SmartView
         end
 
 
-        def default_filter(dimension)
-            "#{dimension}.Descendants"
-        end
-
-
+        # Parses a filter spec and returns a filter name and array of filter
+        # arguments.
         def process_filter(dimension, filter_spec = nil)
-            return 'Hierarchy', [dimension]
+            # Default filter is entire dimension
+            result = ['Hierarchy', [dimension]]
+            if filter_spec
+                # Retrieve list of filters for dimension, and search for one
+                # that matches the filter spec
+                filters = get_filters(dimension)
+                filters.each do |filter|
+                    if md = (filter.decompose && filter.decompose.match(filter_spec))
+                        result = [filter.name, md.captures]
+                        break
+                    end
+                end
+            end
+            result
         end
 
 

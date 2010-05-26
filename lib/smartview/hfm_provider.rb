@@ -9,13 +9,6 @@ class SmartView
         end
 
 
-        # Return the default filter expression for returning members of a
-        # dimension.
-        def default_filter(dimension)
-            "root.[Hierarchy]"
-        end
-
-
         # Processes a filter string specification, and returns the filter name
         # and an array of arguments. The filter string specification should be
         # as it is displayed in the member selection dialog in SmartView, e.g.

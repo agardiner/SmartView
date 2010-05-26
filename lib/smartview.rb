@@ -6,6 +6,7 @@ require 'hpricot'
 require 'smartview/request'
 require 'smartview/preferences'
 require 'smartview/grid'
+require 'smartview/filter'
 
 
 class SmartView
@@ -190,7 +191,7 @@ class SmartView
         doc = invoke
         filters = []
         invoke.search('//res_EnumFilters/filterList/filter').each do |filter|
-            filters << filter['name']
+            filters << Filter.new(filter)
         end
         filters
     end
