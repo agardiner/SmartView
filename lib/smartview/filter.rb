@@ -12,9 +12,9 @@ class SmartView
         def initialize(doc)
             @name = doc['name']
             @compose = doc['compose']
-            @compose = nil unless @compose.length > 0
+            @compose = nil unless @compose && @compose.length > 0
             @decompose = doc['decompose']
-            @decompose = nil unless @decompose.length > 0
+            @decompose = nil unless @decompose && @decompose.length > 0
             @decompose = Regexp.new(@decompose) if @decompose
             @args = doc.search('/arg').map{|arg| arg['name']}
         end
