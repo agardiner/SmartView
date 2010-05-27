@@ -180,19 +180,26 @@ class SmartView
     # Returns a list of available member filters for the specified dimension.
     # A filter can be used to restrict a member query to a certain subset of
     # members, such as the members in a member list.
-    def get_filters(dimension)
+    def get_filters(dimension, force = false)
         check_attached
 
-        @logger.info "Retrieving list of available member filters for #{dimension}"
-        @req.EnumFilters do |xml|
-            xml.sID @session_id
-            xml.dim dimension
+        if @fiters && @filters[dimension] && !force
+            @logger.debug "Retrieving filters for #{dimension} from cache"
+            filters = @filters[dimension]
+        else
+            @logger.info "Retrieving list of available member filters for #{dimension}"
+            @req.EnumFilters do |xml|
+                xml.sID @session_id
+                xml.dim dimension
+            end
+            filters = []
+            invoke.search('//res_EnumFilters/filterList/filter').each do |filter|
+                filters << Filter.new(filter)
+            end
+            @filters = {} unless @filters
+            @filters[dimension] = filters
         end
-        doc = invoke
-        filters = []
-        invoke.search('//res_EnumFilters/filterList/filter').each do |filter|
-            filters << Filter.new(filter)
-        end
+
         filters
     end
 
@@ -202,8 +209,8 @@ class SmartView
     def get_members(dimension, filter_spec = nil, all_gens = true)
         check_attached
 
-        filter_name, filter_args = process_filter(dimension, filter_spec)
         @logger.info "Retrieving list of members for #{dimension}"
+        filter_name, filter_args = process_filter(dimension, filter_spec)
         @req.EnumMembers do |xml|
             xml.sID @session_id
             xml.dim dimension
@@ -228,8 +235,8 @@ class SmartView
     def find_member(dimension, pattern, filter_spec = nil)
         check_attached
 
-        filter_name, filter_args = process_filter(dimension, filter_spec)
         @logger.info "Finding members of #{dimension} matching '#{pattern}'"
+        filter_name, filter_args = process_filter(dimension, filter_spec)
         @req.FindMember do |xml|
             xml.sID @session_id
             xml.dim dimension
